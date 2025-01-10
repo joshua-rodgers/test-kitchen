@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rocker's Kitchen Nigeria</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
+        
+        :root {
+            --background: #f5f5f5;
+            --surface: #ffffff;
+            --surface-secondary: #ffffff;
+            --primary: #ff4646;
+            --text: #333333;
+            --text-secondary: #666666;
+            --border: #eeeeee;
+            --shadow: rgba(0,0,0,0.1);
+            --announcement: #00D569;
+            --header-height: 70px;
+            --banner-height: 40px;
+        }
+
+        [data-theme="dark"] {
+            --background: #121212;
+            --surface: #1e1e1e;
+            --surface-secondary: #252525;
+            --primary: #ff6b6b;
+            --text: #ffffff;
+            --text-secondary: #a0a0a0;
+            --border: #333333;
+            --shadow: rgba(0,0,0,0.3);
+            --announcement: #00D569;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--background);
+            color: var(--text);
+            padding-top: calc(var(--header-height) + var(--banner-height)); /* Space for fixed elements */
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            background: var(--surface);
+            padding: 1rem;
+            box-shadow: 0 2px 4px var(--shadow);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            min-width: 0; /* Enable flexbox shrinking */
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            flex-shrink: 0; /* Prevent logo from shrinking */
+        }
+        
+        .restaurant-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-width: 0; /* Enable text truncation */
+        }
+
+        .theme-toggle {
+            margin-right: 1rem;
+            background: none;
+            border: none;
+            color: var(--text);
+            cursor: pointer;
+            font-size: 1.5rem;
+            padding: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.3s ease;
+        }
+
+        .announcement-banner {
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            right: 0;
+            height: var(--banner-height);
+            background: var(--announcement);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            z-index: 999;
+        }
+
+        .welcome-message {
+            margin: 1rem;
+            padding: 1.5rem;
+            background: var(--surface-secondary);
+            border-radius: 12px;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        .welcome-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .welcome-text {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            text-align: justify;
+        }
+
+        .menu-container {
+            padding: 1rem;
+        }
+
+        .category {
+            background: var(--surface);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        .category-header {
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            background: var(--surface);
+        }
+
+        .category-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .category-content {
+            display: none;
+            padding: 1rem;
+        }
+
+        .category-content.visible {
+            display: block;
+        }
+
+        .menu-item {
+            background: var(--surface-secondary);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+            cursor: pointer;
+        }
+
+        .menu-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .menu-item img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .menu-item-info {
+            padding: 1rem;
+        }
+
+        .menu-item-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .menu-item-price {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            color: var(--text);
+            width: 90%;
+            max-height: 90vh;
+            border-radius: 12px;
+            overflow: auto;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text);
+        }
+
+        .modal-body {
+            padding: 1rem;
+        }
+
+        .modal img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+
+        .options-list {
+            margin: 1rem 0;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            margin: 0.5rem 0;
+            color: var(--text);
+        }
+
+        .add-to-cart {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 1rem;
+            width: 100%;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        .cart-modal .modal-content {
+            padding: 1rem;
+        }
+
+        .cart-items {
+            margin: 1rem 0;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .checkout-form {
+            margin-top: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--surface);
+            color: var(--text);
+        }
+
+        .checkout-button {
+            background: #25d366;
+            color: white;
+            border: none;
+            padding: 1rem;
+            width: 100%;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Rest of your existing styles... */
+
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo-container">
+            <img src="images/logo.png" alt="Restaurant Logo" class="logo" style="width: 40px; height: 40px;">
+            <h1 style="font-size: 1.2rem;">Rocker's Kitchen</h1>
+        </div>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <button class="theme-toggle" onclick="toggleTheme()" style="background: none; border: none; cursor: pointer; font-size: 1.2rem;">
+                🌙
+            </button>
+            <div onclick="openCart()" style="cursor: pointer; position: relative;">
+                🛒
+                <span class="cart-count" style="position: absolute; top: -8px; right: -8px; background: var(--primary); color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 12px;">
+                    0
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <div class="announcement-banner">
+        ORDERS PLACED VIA WHATSAPP
+    </div>
+
+    <div class="welcome-message">
+        <h2 class="welcome-title">Welcome to Rocker's Kitchen</h2>
+        <p class="welcome-text">
+            Browse our menu below and tap any item to see more details and customization options. 
+            Add your selections to the cart, and when you're ready, complete your order through WhatsApp. 
+            We'll confirm your order and provide updates directly in the chat.
+        </p>
+    </div>
+
+    <div class="menu-container" id="menu-container">
+        <!-- Categories will be inserted here -->
+    </div>
+
+    <!-- Item Detail Modal -->
+    <div class="modal" id="item-modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('item-modal')">×</button>
+            <div class="modal-body" id="item-modal-content">
+                <!-- Item details will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Modal -->
+    <div class="modal" id="cart-modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('cart-modal')">×</button>
+            <div class="modal-body">
+                <h2>Your Order</h2>
+                <div class="cart-items" id="cart-items">
+                    <!-- Cart items will be inserted here -->
+                </div>
+                <div class="checkout-form">
+                    <div class="form-group">
+                        <label for="name">Your Name</label>
+                        <input type="text" id="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="instructions">Special Instructions</label>
+                        <textarea id="instructions" rows="3"></textarea>
+                    </div>
+                    <button class="checkout-button" onclick="checkout()">
+                        Complete Order on WhatsApp
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample menu data with categories
+        const menuItems = {
+            'Main Courses': [
+                {
+                    id: 1,
+                    name: "Jollof Rice",
+                    description: "Authentic jollof rice with smoky, spicy, and savory flavors.",
+                    price: 5000,
+                    image: "images/jollof.png",
+                    options: [
+                        { name: "Boiled Egg", price: 500 },
+                        { name: "Fresh Onion", price: 200 },
+                        { name: "Red Stew", price: 500 }
+                    ]
+                },
+                {
+                    id: 2,
+                    name: "Smoked Rice",
+                    description: "Classic smoky party rice.",
+                    price: 7000,
+                    image: "images/smoked.png",
+                    options: [
+                        { name: "Beef Suya", price: 3000},
+                        { name: "Spicy sauce", price: 500 }
+                    ]
+                }
+            ],
+            'Appetizers': [
+                {
+                    id: 3,
+                    name: "Yam and Egg Sauce",
+                    description: "Boiled Yam covered in rich, spicy egg sauce",
+                    price: 5000,
+                    image: "images/yam_egg.png",
+                    options: [
+                        { name: "Extra Pepper", price: 0 },
+                    ]
+                },
+                {
+                    id: 4,
+                    name: "Ewa Igoyin",
+                    description: "Tender honey beans and the sensational Ewa Agoyin sauce.",
+                    price: 5000,
+                    image: "images/ewa.png",
+                    options: [
+                        { name: "Extra Pepper", price: 0 },
+                        { name: "Bread", price: 1000}
+                    ]
+                }
+            ],
+            'Drinks': [
+                {
+                    id: 5,
+                    name: "Fresh Lemonade",
+                    description: "Homemade lemonade with fresh mint",
+                    price: 1500,
+                    image: "images/lemonade.png",
+                    options: [
+                        { name: "Extra mint", price: 200 },
+                        { name: "Add strawberry", price: 500 }
+                    ]
+                }
+            ]
+        };
+
+        const cart = [];  // Global cart array
+
+        // Render menu categories
+        function renderMenu() {
+            const container = document.getElementById('menu-container');
+            let html = '';
+            
+            for (const [category, items] of Object.entries(menuItems)) {
+                html += `
+                    <div class="category" id="category-${category.toLowerCase().replace(/\s+/g, '-')}">
+                        <div class="category-header" onclick="toggleCategory('${category}')">
+                            <span class="category-name">${category}</span>
+                            <span class="category-arrow">▼</span>
+                        </div>
+                        <div class="category-content">
+                            ${items.map(item => `
+                                <div class="menu-item" onclick="showItemDetail(${item.id})">
+                                    <img src="${item.image}" alt="${item.name}">
+                                    <div class="menu-item-info">
+                                        <div class="menu-item-title">${item.name}</div>
+                                        <div class="menu-item-price">₦${item.price.toFixed(2)}</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        // Toggle category visibility
+        function toggleCategory(category) {
+            const categoryId = `category-${category.toLowerCase().replace(/\s+/g, '-')}`;
+            const categoryElement = document.getElementById(categoryId);
+            const content = categoryElement.querySelector('.category-content');
+            const arrow = categoryElement.querySelector('.category-arrow');
+            
+            if (content.classList.contains('visible')) {
+                content.classList.remove('visible');
+                arrow.style.transform = 'rotate(0deg)';
+            } else {
+                content.classList.add('visible');
+                arrow.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        function findItemById(id) {
+            for (const category of Object.values(menuItems)) {
+                const item = category.find(item => item.id === id);
+                if (item) return item;
+            }
+            return null;
+        }
+
+        // Show item detail modal
+        function showItemDetail(itemId) {
+            const item = findItemById(itemId);
+            const modal = document.getElementById('item-modal');
+            const content = document.getElementById('item-modal-content');
+            
+            content.innerHTML = `
+                <img src="${item.image}" alt="${item.name}">
+                <h2>${item.name}</h2>
+                <p>${item.description}</p>
+                <div class="menu-item-price">₦${item.price.toFixed(2)}</div>
+                <div class="options-list">
+                    ${item.options.map(option => `
+                        <div class="option-item">
+                            <input type="checkbox" id="option-${option.name}" data-price="${option.price}">
+                            <label for="option-${option.name}">
+                                ${option.name} (+₦${option.price.toFixed(2)})
+                            </label>
+                        </div>
+                    `).join('')}
+                </div>
+                <button class="add-to-cart" onclick="addToCart(${item.id})">
+                    Add to Cart
+                </button>
+            `;
+            
+            modal.style.display = 'flex';
+        }
+
+        function addToCart(itemId) {
+            const item = findItemById(itemId);
+            if (!item) {
+                console.error('Item not found:', itemId);
+                return;
+            }
+            
+            const selectedOptions = Array.from(document.querySelectorAll('.option-item input:checked'))
+                .map(input => ({
+                    name: input.id.replace('option-', ''),
+                    price: parseFloat(input.dataset.price)
+                }));
+            
+            cart.push({
+                ...item,
+                selectedOptions
+            });
+            
+            updateCartCount();
+            closeModal('item-modal');
+        }
+
+        // Update cart count
+        function updateCartCount() {
+            document.querySelector('.cart-count').textContent = cart.length;
+        }
+
+        // Open cart modal
+        function openCart() {
+            const modal = document.getElementById('cart-modal');
+            const cartItems = document.getElementById('cart-items');
+            
+            cartItems.innerHTML = cart.map(item => `
+                <div class="cart-item">
+                    <div>
+                        ${item.name}
+                        ${item.selectedOptions.map(option => `
+                            <br><small>+ ${option.name}</small>
+                        `).join('')}
+                    </div>
+                    <div>
+                        ₦${(item.price + item.selectedOptions.reduce((sum, opt) => sum + opt.price, 0)).toFixed(2)}
+                    </div>
+                </div>
+            `).join('');
+            
+            modal.style.display = 'flex';
+        }
+
+        // Close modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Checkout - generate WhatsApp message
+        function checkout() {
+            const name = document.getElementById('name').value;
+            const instructions = document.getElementById('instructions').value;
+            
+            if (!name) {
+                alert('Please enter your name');
+                return;
+            }
+            
+            let message = `New Order from ${name}\n\n`;
+            let total = 0;
+            
+            cart.forEach(item => {
+                const itemTotal = item.price + item.selectedOptions.reduce((sum, opt) => sum + opt.price, 0);
+                total += itemTotal;
+                
+                message += `${item.name} - ₦${itemTotal.toFixed(2)}\n`;
+                item.selectedOptions.forEach(option => {
+                    message += `  + ${option.name}\n`;
+                });
+                message += '\n';
+            });
+            
+            message += `\nTotal: ₦${total.toFixed(2)}`;
+            
+            if (instructions) {
+                message += `\n\nSpecial Instructions:\n${instructions}`;
+            }
+            
+            const encodedMessage = encodeURIComponent(message);
+            window.location.href = `https://wa.me/${18708771580}?text=${encodedMessage}`;
+        }
+
+        // Initialize
+        renderMenu();
+
+        // Theme toggling
+        function toggleTheme() {
+            const body = document.documentElement;
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            const themeToggle = document.querySelector('.theme-toggle');
+            
+            if (isDark) {
+                body.removeAttribute('data-theme');
+                themeToggle.innerHTML = '🌙';
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                themeToggle.innerHTML = '☀️';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Set initial theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.querySelector('.theme-toggle').innerHTML = '☀️';
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }        
+    </script>
+</body>
+</html>
